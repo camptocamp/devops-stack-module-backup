@@ -1,13 +1,19 @@
 locals {
   helm_values = [{
     velero = {
-      namespace        = "${var.namespace}"
-      snapshotsEnabled = false
+      deployNodeAgent  = true
+      nodeAgent = {
+          tolerations = {} # TODO
+        }
+      snapshotsEnabled = true
+
+      configuration = {
+        namespace = "${var.namespace}"
+      }
+      schedules = var.backup_schedules
       metrics = {
-        enabled = true
         serviceMonitor = {
-          autodetect = true
-          enabled    = true
+          enabled = true
         }
         prometheusRule = {
           enabled = true

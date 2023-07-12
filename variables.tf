@@ -66,6 +66,25 @@ variable "dependency_ids" {
 ## Module variables
 #######################
 
+variable "backup_schedules" {
+  description = "TBD" # TODO: do
+  type = map(object({
+    disabled    = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+    schedule    = string
+    template = object({
+      # labels             = optional(map(string), {}) # TODO: test
+      # annotations        = optional(map(string), {}) # TODO: test
+      storageLocation    = optional(string)
+      ttl                = optional(string)
+      includedNamespaces = list(string)
+      includedResources  = list(string)
+      # enableSnapshot     = optional(bool, true)
+    })
+  }))
+  default = null
+}
 
 variable "enable_monitoring_dashboard" {
   description = "Boolean to enable the provisioning of a Velero dashboard for Grafana."
