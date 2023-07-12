@@ -64,8 +64,6 @@ The following requirements are needed by this module:
 
 The following providers are used by this module:
 
-- [[provider_null]] <<provider_null,null>> (>= 3)
-
 - [[provider_random]] <<provider_random,random>>
 
 - [[provider_kubernetes]] <<provider_kubernetes,kubernetes>> (~> 2)
@@ -75,6 +73,8 @@ The following providers are used by this module:
 - [[provider_utils]] <<provider_utils,utils>> (>= 1)
 
 - [[provider_argocd]] <<provider_argocd,argocd>> (>= 4)
+
+- [[provider_null]] <<provider_null,null>> (>= 3)
 
 === Resources
 
@@ -183,6 +183,48 @@ Type: `map(string)`
 
 Default: `{}`
 
+==== [[input_backup_schedules]] <<input_backup_schedules,backup_schedules>>
+
+Description: TBD
+
+Type:
+[source,hcl]
+----
+map(object({
+    disabled    = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+    schedule    = string
+    template = object({
+      # labels             = optional(map(string), {}) # TODO: test
+      # annotations        = optional(map(string), {}) # TODO: test
+      storageLocation    = optional(string)
+      ttl                = optional(string)
+      includedNamespaces = list(string)
+      includedResources  = list(string)
+      # enableSnapshot     = optional(bool, true)
+    })
+  }))
+----
+
+Default: `null`
+
+==== [[input_enable_monitoring_dashboard]] <<input_enable_monitoring_dashboard,enable_monitoring_dashboard>>
+
+Description: Boolean to enable the provisioning of a Velero dashboard for Grafana.
+
+Type: `bool`
+
+Default: `true`
+
+==== [[input_alert_backup_timeout]] <<input_alert_backup_timeout,alert_backup_timeout>>
+
+Description: Timeout in seconds before triggering the last successful backup alert
+
+Type: `number`
+
+Default: `86400`
+
 === Outputs
 
 The following outputs are exported:
@@ -218,12 +260,12 @@ Description: the password to access the restic repositories
 [cols="a,a",options="header,autowidth"]
 |===
 |Name |Version
+|[[provider_null]] <<provider_null,null>> |>= 3
 |[[provider_random]] <<provider_random,random>> |n/a
 |[[provider_kubernetes]] <<provider_kubernetes,kubernetes>> |~> 2
-|[[provider_argocd]] <<provider_argocd,argocd>> |>= 4
 |[[provider_helm]] <<provider_helm,helm>> |n/a
-|[[provider_null]] <<provider_null,null>> |>= 3
 |[[provider_utils]] <<provider_utils,utils>> |>= 1
+|[[provider_argocd]] <<provider_argocd,argocd>> |>= 4
 |===
 
 = Resources
@@ -320,6 +362,44 @@ object({
 |IDs of the other modules on which this module depends on.
 |`map(string)`
 |`{}`
+|no
+
+|[[input_backup_schedules]] <<input_backup_schedules,backup_schedules>>
+|TBD
+|
+
+[source]
+----
+map(object({
+    disabled    = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+    schedule    = string
+    template = object({
+      # labels             = optional(map(string), {}) # TODO: test
+      # annotations        = optional(map(string), {}) # TODO: test
+      storageLocation    = optional(string)
+      ttl                = optional(string)
+      includedNamespaces = list(string)
+      includedResources  = list(string)
+      # enableSnapshot     = optional(bool, true)
+    })
+  }))
+----
+
+|`null`
+|no
+
+|[[input_enable_monitoring_dashboard]] <<input_enable_monitoring_dashboard,enable_monitoring_dashboard>>
+|Boolean to enable the provisioning of a Velero dashboard for Grafana.
+|`bool`
+|`true`
+|no
+
+|[[input_alert_backup_timeout]] <<input_alert_backup_timeout,alert_backup_timeout>>
+|Timeout in seconds before triggering the last successful backup alert
+|`number`
+|`86400`
 |no
 
 |===
