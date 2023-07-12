@@ -54,6 +54,8 @@ The following requirements are needed by this module:
 
 - [[requirement_argocd]] <<requirement_argocd,argocd>> (>= 4)
 
+- [[requirement_kubernetes]] <<requirement_kubernetes,kubernetes>> (~> 2)
+
 - [[requirement_null]] <<requirement_null,null>> (>= 3)
 
 - [[requirement_utils]] <<requirement_utils,utils>> (>= 1)
@@ -61,6 +63,12 @@ The following requirements are needed by this module:
 === Providers
 
 The following providers are used by this module:
+
+- [[provider_random]] <<provider_random,random>>
+
+- [[provider_kubernetes]] <<provider_kubernetes,kubernetes>> (~> 2)
+
+- [[provider_helm]] <<provider_helm,helm>>
 
 - [[provider_utils]] <<provider_utils,utils>> (>= 1)
 
@@ -74,8 +82,13 @@ The following resources are used by this module:
 
 - https://registry.terraform.io/providers/oboukili/argocd/latest/docs/resources/application[argocd_application.this] (resource)
 - https://registry.terraform.io/providers/oboukili/argocd/latest/docs/resources/project[argocd_project.this] (resource)
+- https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace[kubernetes_namespace.velero_namespace] (resource)
+- https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret[kubernetes_secret.velero_repo_credentials] (resource)
 - https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.dependencies] (resource)
+- https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.k8s_resources] (resource)
 - https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.this] (resource)
+- https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password[random_password.restic_repo_password] (resource)
+- https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template[helm_template.this] (data source)
 - https://registry.terraform.io/providers/cloudposse/utils/latest/docs/data-sources/deep_merge_yaml[utils_deep_merge_yaml.values] (data source)
 
 === Required Inputs
@@ -128,7 +141,7 @@ Description: Namespace where the applications's Kubernetes resources should be c
 
 Type: `string`
 
-Default: `"<NAMESPACE>"`
+Default: `"velero"`
 
 ==== [[input_helm_values]] <<input_helm_values,helm_values>>
 
@@ -170,6 +183,48 @@ Type: `map(string)`
 
 Default: `{}`
 
+==== [[input_backup_schedules]] <<input_backup_schedules,backup_schedules>>
+
+Description: TBD
+
+Type:
+[source,hcl]
+----
+map(object({
+    disabled    = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+    schedule    = string
+    template = object({
+      # labels             = optional(map(string), {}) # TODO: test
+      # annotations        = optional(map(string), {}) # TODO: test
+      storageLocation    = optional(string)
+      ttl                = optional(string)
+      includedNamespaces = list(string)
+      includedResources  = list(string)
+      # enableSnapshot     = optional(bool, true)
+    })
+  }))
+----
+
+Default: `null`
+
+==== [[input_enable_monitoring_dashboard]] <<input_enable_monitoring_dashboard,enable_monitoring_dashboard>>
+
+Description: Boolean to enable the provisioning of a Velero dashboard for Grafana.
+
+Type: `bool`
+
+Default: `true`
+
+==== [[input_alert_backup_timeout]] <<input_alert_backup_timeout,alert_backup_timeout>>
+
+Description: Timeout in seconds before triggering the last successful backup alert
+
+Type: `number`
+
+Default: `86400`
+
 === Outputs
 
 The following outputs are exported:
@@ -177,6 +232,10 @@ The following outputs are exported:
 ==== [[output_id]] <<output_id,id>>
 
 Description: ID to pass other modules in order to refer to this module as a dependency.
+
+==== [[output_restic_repo_password]] <<output_restic_repo_password,restic_repo_password>>
+
+Description: the password to access the restic repositories
 // END_TF_DOCS
 
 === Reference in table format
@@ -191,6 +250,7 @@ Description: ID to pass other modules in order to refer to this module as a depe
 |===
 |Name |Version
 |[[requirement_argocd]] <<requirement_argocd,argocd>> |>= 4
+|[[requirement_kubernetes]] <<requirement_kubernetes,kubernetes>> |~> 2
 |[[requirement_null]] <<requirement_null,null>> |>= 3
 |[[requirement_utils]] <<requirement_utils,utils>> |>= 1
 |===
@@ -201,6 +261,9 @@ Description: ID to pass other modules in order to refer to this module as a depe
 |===
 |Name |Version
 |[[provider_null]] <<provider_null,null>> |>= 3
+|[[provider_random]] <<provider_random,random>> |n/a
+|[[provider_kubernetes]] <<provider_kubernetes,kubernetes>> |~> 2
+|[[provider_helm]] <<provider_helm,helm>> |n/a
 |[[provider_utils]] <<provider_utils,utils>> |>= 1
 |[[provider_argocd]] <<provider_argocd,argocd>> |>= 4
 |===
@@ -212,8 +275,13 @@ Description: ID to pass other modules in order to refer to this module as a depe
 |Name |Type
 |https://registry.terraform.io/providers/oboukili/argocd/latest/docs/resources/application[argocd_application.this] |resource
 |https://registry.terraform.io/providers/oboukili/argocd/latest/docs/resources/project[argocd_project.this] |resource
+|https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace[kubernetes_namespace.velero_namespace] |resource
+|https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret[kubernetes_secret.velero_repo_credentials] |resource
 |https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.dependencies] |resource
+|https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.k8s_resources] |resource
 |https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource[null_resource.this] |resource
+|https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password[random_password.restic_repo_password] |resource
+|https://registry.terraform.io/providers/hashicorp/helm/latest/docs/data-sources/template[helm_template.this] |data source
 |https://registry.terraform.io/providers/cloudposse/utils/latest/docs/data-sources/deep_merge_yaml[utils_deep_merge_yaml.values] |data source
 |===
 
@@ -255,7 +323,7 @@ Description: ID to pass other modules in order to refer to this module as a depe
 |[[input_namespace]] <<input_namespace,namespace>>
 |Namespace where the applications's Kubernetes resources should be created. Namespace will be created in case it doesn't exist.
 |`string`
-|`"<NAMESPACE>"`
+|`"velero"`
 |no
 
 |[[input_helm_values]] <<input_helm_values,helm_values>>
@@ -296,6 +364,44 @@ object({
 |`{}`
 |no
 
+|[[input_backup_schedules]] <<input_backup_schedules,backup_schedules>>
+|TBD
+|
+
+[source]
+----
+map(object({
+    disabled    = optional(bool, false)
+    labels      = optional(map(string), {})
+    annotations = optional(map(string), {})
+    schedule    = string
+    template = object({
+      # labels             = optional(map(string), {}) # TODO: test
+      # annotations        = optional(map(string), {}) # TODO: test
+      storageLocation    = optional(string)
+      ttl                = optional(string)
+      includedNamespaces = list(string)
+      includedResources  = list(string)
+      # enableSnapshot     = optional(bool, true)
+    })
+  }))
+----
+
+|`null`
+|no
+
+|[[input_enable_monitoring_dashboard]] <<input_enable_monitoring_dashboard,enable_monitoring_dashboard>>
+|Boolean to enable the provisioning of a Velero dashboard for Grafana.
+|`bool`
+|`true`
+|no
+
+|[[input_alert_backup_timeout]] <<input_alert_backup_timeout,alert_backup_timeout>>
+|Timeout in seconds before triggering the last successful backup alert
+|`number`
+|`86400`
+|no
+
 |===
 
 = Outputs
@@ -304,6 +410,7 @@ object({
 |===
 |Name |Description
 |[[output_id]] <<output_id,id>> |ID to pass other modules in order to refer to this module as a dependency.
+|[[output_restic_repo_password]] <<output_restic_repo_password,restic_repo_password>> |the password to access the restic repositories
 |===
 // END_TF_TABLES
 ====

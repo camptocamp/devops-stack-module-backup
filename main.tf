@@ -91,7 +91,7 @@ resource "argocd_application" "this" {
     source {
       repo_url = "https://github.com/camptocamp/devops-stack-module-backup.git"
       path     = "charts/velero"
-      # target_revision = var.target_revision
+      target_revision = var.target_revision
       helm {
         values = data.utils_deep_merge_yaml.values.output
       }
